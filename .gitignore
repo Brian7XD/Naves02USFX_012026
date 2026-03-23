@@ -1,0 +1,23 @@
+# Bloquear carpetas temporales pesadas
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Archivos de Visual Studio 2019
+.vs/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+obj/
+*.pdb
+*.obj
+
+# Archivos de usuario y logs
+/Config/User*
+/Content/Developers/
+*.log
