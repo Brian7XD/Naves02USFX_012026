@@ -30,11 +30,22 @@ AEnemigo::AEnemigo()
     // Evento de choque
     Malla->OnComponentHit.AddDynamic(this, &AEnemigo::OnHit);
 
+    ProyectilClass = ANavesUSFX_12026Projectile::StaticClass();
+
 }
 
 void AEnemigo::BeginPlay()
 {
     Super::BeginPlay();
+
+    GetWorldTimerManager().SetTimer(
+        TimerHandle_Disparo,
+        this,
+        &AEnemigo::Disparar,
+        0.5f,   // dispara cada 2 segundos
+        true
+    );
+
     Velocidad = 800.0f;
     // Dirección inicial aleatoria (sin Z)
     Direccion = FVector(
@@ -89,6 +100,21 @@ void AEnemigo::Desaparecer()
 void AEnemigo::SetControlador(AControladorEnemigo* Ctrl)
 {
     Controlador = Ctrl;
+}
+
+void AEnemigo::Disparar()
+{
+    if (ProyectilClass)
+    {
+        FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
+        FRotator SpawnRotation = GetActorRotation();
+
+        GetWorld()->SpawnActor<ANavesUSFX_12026Projectile>(
+            ProyectilClass,
+            SpawnLocation,
+            SpawnRotation
+            );
+    }
 }
 
 

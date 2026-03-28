@@ -10,11 +10,19 @@
 ANavesUSFX_12026Projectile::ANavesUSFX_12026Projectile() 
 {
 	// Static reference to the mesh to use for the projectile
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ProjectileMeshAsset(TEXT("/Game/TwinStick/Meshes/TwinStickProjectile.TwinStickProjectile"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ProjectileMeshAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+
+	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh0"));
+
+	if (ProjectileMeshAsset.Succeeded())
+	{
+		ProjectileMesh->SetStaticMesh(ProjectileMeshAsset.Object);
+		ProjectileMesh->SetWorldScale3D(FVector(0.2f)); // bala pequeña
+	}
 
 	// Create mesh component for the projectile sphere
-	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh0"));
-	ProjectileMesh->SetStaticMesh(ProjectileMeshAsset.Object);
+	//ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh0"));
+	//ProjectileMesh->SetStaticMesh(ProjectileMeshAsset.Object);
 	ProjectileMesh->SetupAttachment(RootComponent);
 	ProjectileMesh->BodyInstance.SetCollisionProfileName("Projectile");
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &ANavesUSFX_12026Projectile::OnHit);		// set up a notification for when this component hits something

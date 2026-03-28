@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
+#include "NavesUSFX_12026Projectile.h"
 #include "Enemigo.generated.h"
 
 class AControladorEnemigo;
@@ -18,9 +19,17 @@ public:
 	// Sets default values for this actor's properties
 	AEnemigo();
 
+    UPROPERTY(EditAnywhere, Category = "Disparo")
+        TSubclassOf<ANavesUSFX_12026Projectile> ProyectilClass;
+
+    // Timer para disparo automático
+    FTimerHandle TimerHandle_Disparo;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+    void Disparar();
 
 public:	
 	// Called every frame
