@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "NavesUSFX_12026Pawn.generated.h"
 
+class ANavesUSFX_12026Projectile;
+
 UCLASS(Blueprintable)
 class ANavesUSFX_12026Pawn : public APawn
 {
@@ -22,6 +24,9 @@ class ANavesUSFX_12026Pawn : public APawn
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(Category = Camera, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
+
+	UPROPERTY()
+	class UStaticMesh* MallaProyectilJugador;
 
 public:
 	ANavesUSFX_12026Pawn();

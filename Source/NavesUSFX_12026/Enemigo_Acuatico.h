@@ -11,5 +11,6 @@ class NAVESUSFX_12026_API AEnemigo_Acuatico : public AEnemigo
 
 public:
 	AEnemigo_Acuatico();
-	virtual void Tick(float DeltaTime) override;
+protected:
+	virtual void ComportamientoParticular(float DeltaTime) override;
 };

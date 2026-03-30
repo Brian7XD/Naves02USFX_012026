@@ -1,73 +1,91 @@
 ﻿#include "ControladorEnemigo.h"
-
-// Tus clases
 #include "Enemigo.h"
 #include "Enemigo_Aereo.h"
 #include "Enemigo_Terrestre.h"
 #include "Enemigo_Acuatico.h"
+#include "Kismet/GameplayStatics.h" // Necesario para buscar al jugador
 
 AControladorEnemigo::AControladorEnemigo()
 {
-	EnemigosVivos = 0;
-	bSegundaCuadrillaCreada = false;
-
-	PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = false;
+    EnemigosVivos = 0;
 }
 
 void AControladorEnemigo::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-	CrearCuadrilla1();
+    // 1. Iniciamos el juego creando las naves
+    SpawnNaves();
+
+    // 2. Programamos: A los 5 segundos, que se formen
+    GetWorld()->GetTimerManager().SetTimer(TimerFase, this, &AControladorEnemigo::OrdenarFormacion, 5.0f, false);
 }
 
-void AControladorEnemigo::CrearCuadrilla1()
+void AControladorEnemigo::SpawnNaves()
 {
-	FVector PosBase = GetActorLocation();
+    FVector PosBase = GetActorLocation();
 
-	AEnemigo* E1 = GetWorld()->SpawnActor<AEnemigo_Aereo>(PosBase + FVector(0, 0, 100), FRotator::ZeroRotator);
-	AEnemigo* E2 = GetWorld()->SpawnActor<AEnemigo_Terrestre>(PosBase + FVector(200, 0, 0), FRotator::ZeroRotator);
-	AEnemigo* E3 = GetWorld()->SpawnActor<AEnemigo_Acuatico>(PosBase + FVector(-200, 0, 0), FRotator::ZeroRotator);
+    for (int32 i = 0; i < 20; i++)
+    {
+        // Distribución simple para que no choquen al nacer
+        FVector SpawnOffset((i / 5) * 300.0f, (i % 5) * 300.0f, 100.0f);
+        FVector FinalPos = PosBase + SpawnOffset;
 
-	if (E1) E1->SetControlador(this);
-	if (E2) E2->SetControlador(this);
-	if (E3) E3->SetControlador(this);
+        AEnemigo* NuevaNave = nullptr;
 
-	EnemigosVivos = 3;
+        // Alternamos tipos para variedad
+        if (i % 3 == 0) NuevaNave = GetWorld()->SpawnActor<AEnemigo_Aereo>(AEnemigo_Aereo::StaticClass(), FinalPos, FRotator::ZeroRotator);
+        else if (i % 3 == 1) NuevaNave = GetWorld()->SpawnActor<AEnemigo_Terrestre>(AEnemigo_Terrestre::StaticClass(), FinalPos, FRotator::ZeroRotator);
+        else NuevaNave = GetWorld()->SpawnActor<AEnemigo_Acuatico>(AEnemigo_Acuatico::StaticClass(), FinalPos, FRotator::ZeroRotator);
+
+        if (NuevaNave)
+        {
+            NuevaNave->SetControlador(this);
+            ContenedorNaves.Add(NuevaNave);
+        }
+    }
+    EnemigosVivos = ContenedorNaves.Num();
 }
 
-void AControladorEnemigo::CrearCuadrilla2()
+void AControladorEnemigo::OrdenarFormacion()
 {
-	FVector PosBase = GetActorLocation();
+    // Buscamos al Pawn del jugador
+    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    if (!PlayerPawn) return;
 
-	AEnemigo* E1 = GetWorld()->SpawnActor<AEnemigo_Aereo>(PosBase + FVector(0, 200, 100), FRotator::ZeroRotator);
-	AEnemigo* E2 = GetWorld()->SpawnActor<AEnemigo_Terrestre>(PosBase + FVector(200, 200, 0), FRotator::ZeroRotator);
-	AEnemigo* E3 = GetWorld()->SpawnActor<AEnemigo_Acuatico>(PosBase + FVector(-200, 200, 0), FRotator::ZeroRotator);
+    // Calculamos un punto 12 metros al frente del jugador
+    FVector PuntoFrente = PlayerPawn->GetActorLocation() + (PlayerPawn->GetActorForwardVector() * 1200.0f);
 
-	if (E1) E1->SetControlador(this);
-	if (E2) E2->SetControlador(this);
-	if (E3) E3->SetControlador(this);
+    for (int32 i = 0; i < ContenedorNaves.Num(); i++)
+    {
+        if (ContenedorNaves[i])
+        {
+            // Creamos una cuadrilla: 5 columnas x 4 filas
+            FVector OffsetFormacion((i / 5) * 250.0f, (i % 5) * 250.0f, 0.0f);
 
-	EnemigosVivos = 3;
+            ContenedorNaves[i]->SetPosicionFormacion(PuntoFrente + OffsetFormacion);
+            ContenedorNaves[i]->SetEstado(EEstadoNave::EnFormacion);
+        }
+    }
+
+    // Programamos: A los 5 segundos de estar en formación, volver a ser libres
+    GetWorld()->GetTimerManager().SetTimer(TimerFase, this, &AControladorEnemigo::LiberarNaves, 5.0f, false);
+}
+
+void AControladorEnemigo::LiberarNaves()
+{
+    for (AEnemigo* Nave : ContenedorNaves)
+    {
+        if (Nave)
+        {
+            Nave->SetEstado(EEstadoNave::Libre);
+        }
+    }
 }
 
 void AControladorEnemigo::NotificarMuerte()
 {
-	EnemigosVivos--;
-
-	// 🔥 CONDICIÓN DEL EJERCICIO
-	if (EnemigosVivos <= 0 && !bSegundaCuadrillaCreada)
-	{
-		bSegundaCuadrillaCreada = true;
-
-		// ⏱ Esperar antes de crear la siguiente cuadrilla
-		GetWorld()->GetTimerManager().SetTimer(
-			TimerSiguienteCuadrilla,
-			this,
-			&AControladorEnemigo::CrearCuadrilla2,
-			3.0f,   // tiempo de espera (puedes cambiarlo)
-			false
-		);
-	}
+    EnemigosVivos--;
 }
 

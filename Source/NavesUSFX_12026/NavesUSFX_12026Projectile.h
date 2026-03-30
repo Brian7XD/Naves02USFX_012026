@@ -21,9 +21,20 @@ class ANavesUSFX_12026Projectile : public AActor
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
+	
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UStaticMesh* MallaConfigurable;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	float Velocidad;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	float Danio;
 
 public:
 	ANavesUSFX_12026Projectile();
+
+	void InicializarProyectil(UStaticMesh* NuevaMalla, float NuevaVelocidad, float NuevoDanio);
 
 	/** Function to handle the projectile hitting something */
 	UFUNCTION()
@@ -33,5 +44,7 @@ public:
 	FORCEINLINE UStaticMeshComponent* GetProjectileMesh() const { return ProjectileMesh; }
 	/** Returns ProjectileMovement subobject **/
 	FORCEINLINE UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
-};
 
+protected:
+	virtual void BeginPlay() override;
+};

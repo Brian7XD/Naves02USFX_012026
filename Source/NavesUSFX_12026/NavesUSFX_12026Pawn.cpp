@@ -44,6 +44,14 @@ ANavesUSFX_12026Pawn::ANavesUSFX_12026Pawn()
 	CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;	// Camera does not rotate relative to arm
 
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ProyectilMeshAsset(TEXT("/Game/TwinStick/Meshes/TwinStickProjectile.TwinStickProjectile"));
+
+	if (ProyectilMeshAsset.Succeeded())
+	{
+		// Guardamos la referencia en nuestra variable
+		MallaProyectilJugador = ProyectilMeshAsset.Object;
+	}
+
 	// Movement
 	MoveSpeed = 1000.0f;
 	// Weapon
@@ -101,33 +109,37 @@ void ANavesUSFX_12026Pawn::Tick(float DeltaSeconds)
 
 void ANavesUSFX_12026Pawn::FireShot(FVector FireDirection)
 {
-	// If it's ok to fire again
-	if (bCanFire == true)
+	if (bCanFire == true && FireDirection.SizeSquared() > 0.0f)
 	{
-		// If we are pressing fire stick in a direction
-		if (FireDirection.SizeSquared() > 0.0f)
+		const FRotator FireRotation = FireDirection.Rotation();
+		const FVector SpawnLocation = GetActorLocation() + FireRotation.RotateVector(GunOffset);
+
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
 		{
-			const FRotator FireRotation = FireDirection.Rotation();
-			// Spawn projectile at an offset from this pawn
-			const FVector SpawnLocation = GetActorLocation() + FireRotation.RotateVector(GunOffset);
+			// 1. Spawneamos el proyectil y guardamos la referencia en una variable
+			ANavesUSFX_12026Projectile* Proyectil = World->SpawnActor<ANavesUSFX_12026Projectile>(SpawnLocation, FireRotation);
 
-			UWorld* const World = GetWorld();
-			if (World != nullptr)
+			// 2. Si el proyectil se creó correctamente, lo inicializamos
+			if (Proyectil)
 			{
-				// spawn the projectile
-				World->SpawnActor<ANavesUSFX_12026Projectile>(SpawnLocation, FireRotation);
+				// Le pasamos la malla, una velocidad alta (ej. 3000) y el daño
+				float VelocidadBalaJugador = 3000.0f;
+				float DanioBalaJugador = 20.0f;
+
+				Proyectil->InicializarProyectil(MallaProyectilJugador, VelocidadBalaJugador, DanioBalaJugador);
+
+				// Opcional: Que el proyectil ignore a la propia nave para evitar choques
+				Proyectil->GetProjectileMesh()->IgnoreActorWhenMoving(this, true);
 			}
+		}
 
-			bCanFire = false;
-			World->GetTimerManager().SetTimer(TimerHandle_ShotTimerExpired, this, &ANavesUSFX_12026Pawn::ShotTimerExpired, FireRate);
+		bCanFire = false;
+		World->GetTimerManager().SetTimer(TimerHandle_ShotTimerExpired, this, &ANavesUSFX_12026Pawn::ShotTimerExpired, FireRate);
 
-			// try and play the sound if specified
-			if (FireSound != nullptr)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-			}
-
-			bCanFire = false;
+		if (FireSound != nullptr)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 		}
 	}
 }

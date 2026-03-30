@@ -10,57 +10,70 @@
 
 class AControladorEnemigo;
 
+// Estados para el ejercicio de formación
+UENUM(BlueprintType)
+enum class EEstadoNave : uint8 {
+    Libre,
+    EnFormacion
+};
+
 UCLASS()
 class NAVESUSFX_12026_API AEnemigo : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AEnemigo();
+    GENERATED_BODY()
+
+public:
+    AEnemigo();
+
+    // --- Funciones de Estado (NUEVO) ---
+    void SetEstado(EEstadoNave NuevoEstado) { EstadoActual = NuevoEstado; }
+    void SetPosicionFormacion(FVector NuevaPos) { PosicionFormacion = NuevaPos; }
+
+    // --- Variables de Disparo (TUS ORIGINALES) ---
+    UPROPERTY(EditAnywhere, Category = "Disparo")
+        TSubclassOf<class ANavesUSFX_12026Projectile> ProyectilClass;
 
     UPROPERTY(EditAnywhere, Category = "Disparo")
-        TSubclassOf<ANavesUSFX_12026Projectile> ProyectilClass;
+        UStaticMesh* MallaProyectil;
 
-    // Timer para disparo automático
+    UPROPERTY(EditAnywhere, Category = "Disparo")
+        float VelocidadProyectil;
+
+    UPROPERTY(EditAnywhere, Category = "Disparo")
+        float DanioProyectil;
+
     FTimerHandle TimerHandle_Disparo;
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
+    virtual void BeginPlay() override;
     void Disparar();
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    // Función para que los hijos (Aéreo, Terrestre) pongan su movimiento aquí
+    virtual void ComportamientoParticular(float DeltaTime);
 
-    void SetControlador(AControladorEnemigo* Ctrl);
-
-    void Desaparecer();
-
-protected:
-
-    // Malla del enemigo
+    // --- Variables de Movimiento y Componentes (TUS ORIGINALES + NUEVOS) ---
     UPROPERTY(VisibleAnywhere)
-    UStaticMeshComponent* Malla;
+        UStaticMeshComponent* Malla;
 
-    // Dirección de movimiento
     FVector Direccion;
 
-    // Velocidad
     UPROPERTY(EditAnywhere)
-    float Velocidad;
+        float Velocidad;
 
     UPROPERTY(EditAnywhere)
-    bool bPermitirMovimientoZ;
+        bool bPermitirMovimientoZ;
 
     AControladorEnemigo* Controlador;
+    EEstadoNave EstadoActual = EEstadoNave::Libre;
+    FVector PosicionFormacion;
 
-    // Función para rebote
+public:
+    virtual void Tick(float DeltaTime) override;
+    void SetControlador(AControladorEnemigo* Ctrl);
+    void Desaparecer();
+
     UFUNCTION()
         void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
             UPrimitiveComponent* OtherComp, FVector NormalImpulse,
             const FHitResult& Hit);
-
 };

@@ -12,4 +12,6 @@ class NAVESUSFX_12026_API AEnemigo_Terrestre : public AEnemigo
 public:
 	AEnemigo_Terrestre();
 	
+protected:
+	virtual void ComportamientoParticular(float DeltaTime) override;
 };

@@ -9,36 +9,29 @@
 
 ANavesUSFX_12026Projectile::ANavesUSFX_12026Projectile() 
 {
-	// Static reference to the mesh to use for the projectile
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ProjectileMeshAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
-
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh0"));
+	RootComponent = ProjectileMesh;
 
-	if (ProjectileMeshAsset.Succeeded())
-	{
-		ProjectileMesh->SetStaticMesh(ProjectileMeshAsset.Object);
-		ProjectileMesh->SetWorldScale3D(FVector(0.2f)); // bala pequeña
-	}
+	ProjectileMesh->SetWorldScale3D(FVector(1.0f));
 
-	// Create mesh component for the projectile sphere
-	//ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh0"));
-	//ProjectileMesh->SetStaticMesh(ProjectileMeshAsset.Object);
-	ProjectileMesh->SetupAttachment(RootComponent);
 	ProjectileMesh->BodyInstance.SetCollisionProfileName("Projectile");
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &ANavesUSFX_12026Projectile::OnHit);		// set up a notification for when this component hits something
-	RootComponent = ProjectileMesh;
+	
+	Velocidad = 800.f;
+	Danio = 10.f;
 
 	// Use a ProjectileMovementComponent to govern this projectile's movement
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement0"));
 	ProjectileMovement->UpdatedComponent = ProjectileMesh;
-	ProjectileMovement->InitialSpeed = 3000.f;
-	ProjectileMovement->MaxSpeed = 3000.f;
+	ProjectileMovement->InitialSpeed = Velocidad;
+	ProjectileMovement->MaxSpeed = Velocidad;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = false;
 	ProjectileMovement->ProjectileGravityScale = 0.f; // No gravity
 
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
+
 }
 
 void ANavesUSFX_12026Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -50,4 +43,41 @@ void ANavesUSFX_12026Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* Oth
 	}
 
 	Destroy();
+}
+
+void ANavesUSFX_12026Projectile::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (MallaConfigurable)
+	{
+		ProjectileMesh->SetStaticMesh(MallaConfigurable);
+	}
+
+	// Aplicar velocidad
+	if (ProjectileMovement)
+	{
+		ProjectileMovement->InitialSpeed = Velocidad;
+		ProjectileMovement->MaxSpeed = Velocidad;
+	}
+}
+void ANavesUSFX_12026Projectile::InicializarProyectil(UStaticMesh* NuevaMalla, float NuevaVelocidad, float NuevoDanio)
+{
+	if (NuevaMalla)
+	{
+		ProjectileMesh->SetStaticMesh(NuevaMalla);
+	}
+
+	Velocidad = NuevaVelocidad;
+	Danio = NuevoDanio;
+
+	if (ProjectileMovement)
+	{
+		// No basta con setear InitialSpeed, hay que setear la velocidad actual
+		ProjectileMovement->MaxSpeed = Velocidad;
+		ProjectileMovement->InitialSpeed = Velocidad;
+
+		// ESTA LÍNEA ES VITAL: Actualiza el vector de movimiento real
+		ProjectileMovement->Velocity = GetActorForwardVector() * Velocidad;
+	}
 }

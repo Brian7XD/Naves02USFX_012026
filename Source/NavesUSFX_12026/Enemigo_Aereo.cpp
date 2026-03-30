@@ -1,4 +1,4 @@
-#include "Enemigo_Aereo.h"
+﻿#include "Enemigo_Aereo.h"
 #include "UObject/ConstructorHelpers.h"
 
 AEnemigo_Aereo::AEnemigo_Aereo()
@@ -12,13 +12,29 @@ AEnemigo_Aereo::AEnemigo_Aereo()
 	{
 		Malla->SetStaticMesh(MeshAsset.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshProyectilAsset(
+		TEXT("/ Game / StarterContent / Shapes / Shape_Pipe.Shape_Pipe")
+	);
+
+	if (MeshProyectilAsset.Succeeded())
+	{
+		MallaProyectil = MeshProyectilAsset.Object;
+	}
+
+	// 🔥 CONFIGURACIÓN DEL PROYECTIL
+	VelocidadProyectil = 2000.f;
+	DanioProyectil = 20.f;
 }
 
-void AEnemigo_Aereo::Tick(float DeltaTime)
+void AEnemigo_Aereo::ComportamientoParticular(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
-	Direccion.Z = FMath::Sin(GetWorld()->TimeSeconds) * 0.3f;
+	if (bPermitirMovimientoZ)
+	{
+		Direccion.Z = FMath::Sin(GetWorld()->GetTimeSeconds()) * 0.2f;
+	}
 
 	Direccion.Normalize();
+
+	AddActorWorldOffset(Direccion * Velocidad * DeltaTime, true);
 }
