@@ -119,9 +119,8 @@ void AEnemigo::Disparar()
         FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 200.0f) + FVector(0, 0, 50.0f);
         FRotator SpawnRotation = GetActorRotation();
 
-        // Añadimos parámetros de Spawn
         FActorSpawnParameters SpawnParams;
-        SpawnParams.Owner = this; // Definimos quién es el dueño
+        SpawnParams.Owner = this;
 
         ANavesUSFX_12026Projectile* Proyectil = GetWorld()->SpawnActor<ANavesUSFX_12026Projectile>(
             ProyectilClass,
@@ -132,10 +131,12 @@ void AEnemigo::Disparar()
 
         if (Proyectil)
         {
-            // ESTA LÍNEA ES CLAVE: La malla de la bala ignora al enemigo
             Proyectil->GetProjectileMesh()->IgnoreActorWhenMoving(this, true);
 
-            Proyectil->InicializarProyectil(MallaProyectil, VelocidadProyectil, DanioProyectil);
+            // 🔥 Aquí aplicamos el polimorfismo de datos:
+            // Por defecto, pasamos 'false' y '0.0f' para que el proyectil sea normal.
+            // Las clases Terrestre y Acuática usarán esta lógica.
+            Proyectil->InicializarProyectil(MallaProyectil, VelocidadProyectil, DanioProyectil, false, 0.0f);
         }
     }
 }

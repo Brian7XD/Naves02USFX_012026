@@ -46,7 +46,8 @@ public:
 
 protected:
     virtual void BeginPlay() override;
-    void Disparar();
+
+    virtual void Disparar();
 
     // Función para que los hijos (Aéreo, Terrestre) pongan su movimiento aquí
     virtual void ComportamientoParticular(float DeltaTime);

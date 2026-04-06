@@ -26,8 +26,8 @@ AEnemigo_Terrestre::AEnemigo_Terrestre()
 	}
 
 	// 🔥 CONFIGURACIÓN DEL PROYECTIL
-	VelocidadProyectil = 2000.f;
-	DanioProyectil = 20.f;
+	VelocidadProyectil = 800.f;
+	DanioProyectil = 10.f;
 }
 
 void AEnemigo_Terrestre::ComportamientoParticular(float DeltaTime)

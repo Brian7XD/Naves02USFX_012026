@@ -112,20 +112,26 @@ void AAlienigena::Disparar()
 	FVector Posicion = GetActorLocation() + GetActorForwardVector() * 100;
 	FRotator Rotacion = GetActorRotation();
 
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+
 	ANavesUSFX_12026Projectile* Proyectil =
 		GetWorld()->SpawnActor<ANavesUSFX_12026Projectile>(
 			ClaseProyectil,
 			Posicion,
-			Rotacion
+			Rotacion,
+			SpawnParams
 			);
 
 	if (Proyectil)
 	{
-		// 🔥 CLAVE: USAR TU SISTEMA PERSONALIZADO
+		// 🔥 CORRECCIÓN AQUÍ: Añadimos 'false' y '0.0f' para los nuevos parámetros
 		Proyectil->InicializarProyectil(
 			MallaProyectil,
 			VelocidadProyectil,
-			DanioProyectil
+			DanioProyectil,
+			false,  // bEsExplosivo
+			0.0f    // RadioExplosion
 		);
 	}
 }

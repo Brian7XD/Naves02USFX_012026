@@ -9,42 +9,55 @@
 class UProjectileMovementComponent;
 class UStaticMeshComponent;
 
-UCLASS(config=Game)
+UCLASS(config = Game)
 class ANavesUSFX_12026Projectile : public AActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-	/** Sphere collision component */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* ProjectileMesh;
+        /** Componente de malla del proyectil */
+        UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Projectile, meta = (AllowPrivateAccess = "true"))
+        UStaticMeshComponent* ProjectileMesh;
 
-	/** Projectile movement component */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	UProjectileMovementComponent* ProjectileMovement;
-	
-	UPROPERTY(EditAnywhere, Category = "Config")
-	UStaticMesh* MallaConfigurable;
+    /** Componente de movimiento del proyectil */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+        UProjectileMovementComponent* ProjectileMovement;
 
-	UPROPERTY(EditAnywhere, Category = "Config")
-	float Velocidad;
+    UPROPERTY(EditAnywhere, Category = "Config")
+        UStaticMesh* MallaConfigurable;
 
-	UPROPERTY(EditAnywhere, Category = "Config")
-	float Danio;
+    UPROPERTY(EditAnywhere, Category = "Config")
+        float Velocidad;
+
+    UPROPERTY(EditAnywhere, Category = "Config")
+        float Danio;
+
+    UPROPERTY(EditAnywhere, Category = "Efectos")
+        class UParticleSystem* EfectoExplosion;
+
+    // --- VARIABLES PARA POLIMORFISMO DE EXPLOSIÓN ---
+    UPROPERTY(EditAnywhere, Category = "Config")
+        bool bEsExplosivo = false;
+
+    UPROPERTY(EditAnywhere, Category = "Config")
+        float RadioExplosion = 300.0f;
 
 public:
-	ANavesUSFX_12026Projectile();
+    ANavesUSFX_12026Projectile();
 
-	void InicializarProyectil(UStaticMesh* NuevaMalla, float NuevaVelocidad, float NuevoDanio);
+    /** * Función de inicialización extendida para soportar diferentes tipos de proyectiles.
+     * Ahora acepta parámetros de explosión para permitir el comportamiento polimórfico.
+     */
+    void InicializarProyectil(UStaticMesh* NuevaMalla, float NuevaVelocidad, float NuevoDanio, bool bExplosivo, float NuevoRadio);
 
-	/** Function to handle the projectile hitting something */
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+    /** Función para manejar la colisión del proyectil */
+    UFUNCTION()
+        void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	/** Returns ProjectileMesh subobject **/
-	FORCEINLINE UStaticMeshComponent* GetProjectileMesh() const { return ProjectileMesh; }
-	/** Returns ProjectileMovement subobject **/
-	FORCEINLINE UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
+    /** Retorna el ProjectileMesh subobject **/
+    FORCEINLINE UStaticMeshComponent* GetProjectileMesh() const { return ProjectileMesh; }
+    /** Retorna el ProjectileMovement subobject **/
+    FORCEINLINE UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 };

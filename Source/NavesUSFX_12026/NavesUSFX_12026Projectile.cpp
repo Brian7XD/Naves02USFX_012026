@@ -1,6 +1,8 @@
-// Copyright Epic Games, Inc. All Rights Reserve
+﻿// Copyright Epic Games, Inc. All Rights Reserve
 
 #include "NavesUSFX_12026Projectile.h"
+#include "Particles/ParticleSystem.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/StaticMeshComponent.h"
@@ -32,16 +34,37 @@ ANavesUSFX_12026Projectile::ANavesUSFX_12026Projectile()
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
 
+	// Cargar el efecto de explosión del Starter Content
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion"));
+
+	if (ParticleAsset.Succeeded())
+	{
+		EfectoExplosion = ParticleAsset.Object;
+	}
+
 }
 
 void ANavesUSFX_12026Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// Only add impulse and destroy projectile if we hit a physics
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
+	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
-		OtherComp->AddImpulseAtLocation(GetVelocity() * 20.0f, GetActorLocation());
-	}
+		// --- AÑADE ESTO PARA MOVER BLOQUES ---
+		if (OtherComp->IsSimulatingPhysics())
+		{
+			// Aplicar un impulso en el punto de impacto
+			// Puedes multiplicar Hit.ImpactNormal por un valor negativo para empujar
+			OtherComp->AddImpulseAtLocation(GetVelocity() * 20.0f, GetActorLocation());
+		}
 
+		if (bEsExplosivo)
+		{
+			UGameplayStatics::ApplyRadialDamage(this, Danio, GetActorLocation(), RadioExplosion, UDamageType::StaticClass(), TArray<AActor*>(), this);
+			if (EfectoExplosion)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EfectoExplosion, GetActorLocation(), FRotator::ZeroRotator, FVector(2.0f));
+			}
+		}
+	}
 	Destroy();
 }
 
@@ -61,23 +84,29 @@ void ANavesUSFX_12026Projectile::BeginPlay()
 		ProjectileMovement->MaxSpeed = Velocidad;
 	}
 }
-void ANavesUSFX_12026Projectile::InicializarProyectil(UStaticMesh* NuevaMalla, float NuevaVelocidad, float NuevoDanio)
+void ANavesUSFX_12026Projectile::InicializarProyectil(UStaticMesh* NuevaMalla, float NuevaVelocidad, float NuevoDanio, bool bExplosivo, float NuevoRadio)
 {
+	// 1. Cambiar la malla visual
 	if (NuevaMalla)
 	{
 		ProjectileMesh->SetStaticMesh(NuevaMalla);
 	}
 
+	// 2. Asignar stats básicos
 	Velocidad = NuevaVelocidad;
 	Danio = NuevoDanio;
 
+	// 3. Asignar stats de polimorfismo (NUEVO)
+	bEsExplosivo = bExplosivo;
+	RadioExplosion = NuevoRadio;
+
+	// 4. Configurar el movimiento físico
 	if (ProjectileMovement)
 	{
-		// No basta con setear InitialSpeed, hay que setear la velocidad actual
 		ProjectileMovement->MaxSpeed = Velocidad;
 		ProjectileMovement->InitialSpeed = Velocidad;
 
-		// ESTA L�NEA ES VITAL: Actualiza el vector de movimiento real
+		// Actualiza el vector de movimiento real con la nueva velocidad
 		ProjectileMovement->Velocity = GetActorForwardVector() * Velocidad;
 	}
 }

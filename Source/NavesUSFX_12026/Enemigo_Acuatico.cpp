@@ -25,7 +25,7 @@ AEnemigo_Acuatico::AEnemigo_Acuatico()
 	}
 
 	// 🔥 CONFIGURACIÓN DEL PROYECTIL
-	VelocidadProyectil = 2000.f;
+	VelocidadProyectil = 5000.f;
 	DanioProyectil = 20.f;
 }
 

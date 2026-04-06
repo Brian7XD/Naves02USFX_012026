@@ -12,4 +12,6 @@ class NAVESUSFX_12026_API AEnemigo_Aereo : public AEnemigo
 protected:
 	AEnemigo_Aereo(); 
 	virtual void ComportamientoParticular(float DeltaTime) override;
+
+	virtual void Disparar() override;
 };

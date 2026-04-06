@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "NavesUSFX_12026Pawn.h"
 #include "NavesUSFX_12026Projectile.h"
@@ -117,19 +117,24 @@ void ANavesUSFX_12026Pawn::FireShot(FVector FireDirection)
 		UWorld* const World = GetWorld();
 		if (World != nullptr)
 		{
-			// 1. Spawneamos el proyectil y guardamos la referencia en una variable
+			// 1. Spawneamos el proyectil
 			ANavesUSFX_12026Projectile* Proyectil = World->SpawnActor<ANavesUSFX_12026Projectile>(SpawnLocation, FireRotation);
 
-			// 2. Si el proyectil se cre� correctamente, lo inicializamos
+			// 2. Inicialización corregida
 			if (Proyectil)
 			{
-				// Le pasamos la malla, una velocidad alta (ej. 3000) y el da�o
 				float VelocidadBalaJugador = 3000.0f;
 				float DanioBalaJugador = 20.0f;
 
-				Proyectil->InicializarProyectil(MallaProyectilJugador, VelocidadBalaJugador, DanioBalaJugador);
+				// 🔥 AÑADIMOS 'false' y '0.0f' al final para los parámetros de explosión
+				Proyectil->InicializarProyectil(
+					MallaProyectilJugador,
+					VelocidadBalaJugador,
+					DanioBalaJugador,
+					false, // bEsExplosivo
+					0.0f   // RadioExplosion
+				);
 
-				// Opcional: Que el proyectil ignore a la propia nave para evitar choques
 				Proyectil->GetProjectileMesh()->IgnoreActorWhenMoving(this, true);
 			}
 		}
