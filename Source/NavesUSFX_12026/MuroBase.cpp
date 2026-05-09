@@ -20,12 +20,19 @@ AMuroBase::AMuroBase()
     {
         // Si el motor encontró el archivo, se lo asignamos al componente
         MallaMuro->SetStaticMesh(MeshAsset.Object);
-        MallaMuro->SetWorldScale3D(FVector(1.0f));
+
+        // El cubo básico mide 100x100x100 unidades (1 metro cúbico).
+        // FVector(X, Y, Z) donde:
+        // X = Ancho (profundidad)
+        // Y = Largo (ancho frontal)
+        // Z = Alto
+
+        FVector NuevaEscala = FVector(0.5f, 2.0f, 3.0f); 
+        MallaMuro->SetWorldScale3D(NuevaEscala);        
     }
     else
     {
-        // Mensaje de error en el log si no encuentra la malla
-        UE_LOG(LogTemp, Error, TEXT("MuroBase: No se pudo encontrar la malla en la ruta especificada."));
+        UE_LOG(LogTemp, Error, TEXT("MuroBase: No se pudo encontrar la malla."));
     }
 }
 

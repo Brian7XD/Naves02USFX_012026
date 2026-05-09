@@ -57,7 +57,6 @@ void AEnemigo::BeginPlay()
         0.5f,   
         true
     );
-
     Velocidad = 800.0f;
     // Dirección inicial aleatoria (sin Z)
     Direccion = FVector(
@@ -65,7 +64,6 @@ void AEnemigo::BeginPlay()
         FMath::FRandRange(-1.f, 1.f),
         0
     ).GetSafeNormal();
-
 }
 
 void AEnemigo::Tick(float DeltaTime)

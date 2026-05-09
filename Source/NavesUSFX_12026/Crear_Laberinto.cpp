@@ -1,6 +1,6 @@
 #include "Crear_Laberinto.h"
 #include "Engine/World.h"
-#include "Engine/Engine.h" // <--- NUEVO: Necesario para mensajes en pantalla
+#include "Engine/Engine.h" 
 
 ACrear_Laberinto::ACrear_Laberinto()
 {
@@ -32,7 +32,7 @@ void ACrear_Laberinto::ConstruirLaberinto()
     {
         for (int32 j = 0; j < Columnas; j++)
         {
-            FVector Ubicacion = GetActorLocation() + FVector(i * Espaciado, j * Espaciado, 200.0f);
+            FVector Ubicacion = GetActorLocation() + FVector(i * Espaciado, j * Espaciado, 500.0f);
 
             UClass* ClaseParaSpawnear = nullptr;
             int32 Seleccion = FMath::RandRange(0, 5);

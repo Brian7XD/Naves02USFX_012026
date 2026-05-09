@@ -3,9 +3,19 @@
 #include "NavesUSFX_12026GameMode.h"
 #include "NavesUSFX_12026Pawn.h"
 
-ANavesUSFX_12026GameMode::ANavesUSFX_12026GameMode()
+
+void ANavesUSFX_12026GameMode::BeginPlay()
 {
-	// set default pawn class to our character class
-	DefaultPawnClass = ANavesUSFX_12026Pawn::StaticClass();
+    Super::BeginPlay();
+
+    FachadaEnemigos = GetWorld()->SpawnActor<AFacadeNaves>(AFacadeNaves::StaticClass(),
+    FVector::ZeroVector,
+    FRotator::ZeroRotator
+    );
+
+    if (FachadaEnemigos)
+    {
+        FachadaEnemigos->IniciarAtaques();
+    }
 }
 

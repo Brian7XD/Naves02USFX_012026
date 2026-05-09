@@ -12,7 +12,7 @@ class NAVESUSFX_12026_API AMuroBase_Desaparece : public AMuroBase {
 protected:
     virtual void EfectoEspecial(float DeltaTime) override;
 
-    float TiempoAcumulado = 0.0f;
+    float TiempoAcumulado = 0.0f; 
 
     UPROPERTY(EditAnywhere, Category = "Muro Intermitente")
         float Intervalo = 3.0f; // Segundos entre cambios
