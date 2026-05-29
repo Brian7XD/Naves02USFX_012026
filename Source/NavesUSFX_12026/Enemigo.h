@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
 #include "NavesUSFX_12026Projectile.h"
+#include "Enemy.h"
 #include "Enemigo.generated.h"
 
 class AControladorEnemigo;
@@ -18,12 +19,16 @@ enum class EEstadoNave : uint8 {
 };
 
 UCLASS()
-class NAVESUSFX_12026_API AEnemigo : public AActor
+class NAVESUSFX_12026_API AEnemigo : public AActor, public IEnemy
 {
     GENERATED_BODY()
 
 public:
     AEnemigo();
+
+    virtual void Disparar() override;
+    virtual void ComportamientoParticular(float DeltaTime) override;
+    virtual void Die() override;
 
     // --- Funciones de Estado (NUEVO) ---
     void SetEstado(EEstadoNave NuevoEstado) { EstadoActual = NuevoEstado; }
@@ -47,12 +52,6 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-    virtual void Disparar();
-
-    // Función para que los hijos (Aéreo, Terrestre) pongan su movimiento aquí
-    virtual void ComportamientoParticular(float DeltaTime);
-
-    // --- Variables de Movimiento y Componentes (TUS ORIGINALES + NUEVOS) ---
     UPROPERTY(VisibleAnywhere)
         UStaticMeshComponent* Malla;
 
@@ -68,6 +67,15 @@ protected:
     EEstadoNave EstadoActual = EEstadoNave::Libre;
     FVector PosicionFormacion;
 
+    UPROPERTY(EditAnywhere, Category = "Stats")
+        float Vida;
+
+    UPROPERTY(EditAnywhere, Category = "Stats")
+        float Blindaje;
+
+    UPROPERTY(EditAnywhere, Category = "Stats")
+        float Escudo;
+
 public:
     virtual void Tick(float DeltaTime) override;
     void SetControlador(AControladorEnemigo* Ctrl);
@@ -77,4 +85,18 @@ public:
         void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
             UPrimitiveComponent* OtherComp, FVector NormalImpulse,
             const FHitResult& Hit);
+
+    virtual void RecibirDanio(float Danio);
+
+    virtual float GetVida() const;
+    virtual void SetVida(float NuevaVida);
+
+    virtual float GetBlindaje() const;
+    virtual void SetBlindaje(float NuevoBlindaje);
+
+    virtual float GetEscudo() const;
+    virtual void SetEscudo(float NuevoEscudo);
+
+    virtual float GetVelocidad() const;
+    virtual void SetVelocidad(float NuevaVelocidad);
 };

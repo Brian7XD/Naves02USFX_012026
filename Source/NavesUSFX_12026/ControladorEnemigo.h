@@ -5,6 +5,7 @@
 #include "ControladorEnemigo.generated.h"
 
 class AEnemigo;
+class AEnemyFactory;
 
 UCLASS()
 class NAVESUSFX_12026_API AControladorEnemigo : public AActor
@@ -18,6 +19,7 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+
     // Genera las 20 naves al inicio
     void SpawnNaves();
 
@@ -36,4 +38,7 @@ private:
 
     UPROPERTY()
         TArray<AEnemigo*> ContenedorNaves;
+
+    UPROPERTY()
+        TArray<AEnemyFactory*> Factories;
 };

@@ -1,6 +1,9 @@
-﻿#include "ControladorEnemigo.h"
+﻿#include "Enemigo.h"
+#include "ControladorEnemigo.h"
 #include "TimerManager.h"
-#include "Enemigo.h"
+#include "DecoradorEscudo.h"
+#include "DecoradorBlindaje.h"
+#include "DecoradorVelocidad.h"
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -44,6 +47,9 @@ AEnemigo::AEnemigo()
     VelocidadProyectil = 800.f;
     DanioProyectil = 10.f;
 
+    Vida = 100.0f;
+    Blindaje = 0.0f;
+    Escudo = 0.0f;
 }
 
 void AEnemigo::BeginPlay()
@@ -64,6 +70,30 @@ void AEnemigo::BeginPlay()
         FMath::FRandRange(-1.f, 1.f),
         0
     ).GetSafeNormal();
+
+    ADecoradorEscudo* DecoradorEscudo =
+        GetWorld()->SpawnActor<ADecoradorEscudo>();
+
+    if (DecoradorEscudo)
+    {
+        DecoradorEscudo->SetEnemigo(this);
+    }
+
+    ADecoradorBlindaje* DecoradorBlindaje =
+        GetWorld()->SpawnActor<ADecoradorBlindaje>();
+
+    if (DecoradorBlindaje)
+    {
+        DecoradorBlindaje->SetEnemigo(this);
+    }
+
+    ADecoradorVelocidad* DecoradorVelocidad =
+        GetWorld()->SpawnActor<ADecoradorVelocidad>();
+
+    if (DecoradorVelocidad)
+    {
+        DecoradorVelocidad->SetEnemigo(this);
+    }
 }
 
 void AEnemigo::Tick(float DeltaTime)
@@ -130,10 +160,6 @@ void AEnemigo::Disparar()
         if (Proyectil)
         {
             Proyectil->GetProjectileMesh()->IgnoreActorWhenMoving(this, true);
-
-            // 🔥 Aquí aplicamos el polimorfismo de datos:
-            // Por defecto, pasamos 'false' y '0.0f' para que el proyectil sea normal.
-            // Las clases Terrestre y Acuática usarán esta lógica.
             Proyectil->InicializarProyectil(MallaProyectil, VelocidadProyectil, DanioProyectil, false, 0.0f);
         }
     }
@@ -141,7 +167,84 @@ void AEnemigo::Disparar()
 
 void AEnemigo::ComportamientoParticular(float DeltaTime)
 {
-    // Este es el movimiento por defecto cuando están "Libres"
-    // Si no es un enemigo especial (aéreo/terrestre), simplemente se mueve y rebota
     AddActorWorldOffset(Direccion * Velocidad * DeltaTime, true);
+}
+
+void AEnemigo::Die()
+{
+    Desaparecer();
+}
+
+void AEnemigo::RecibirDanio(float Danio)
+{
+    Danio -= Blindaje;
+
+    Danio = FMath::Max(0.0f, Danio);
+
+    if (Escudo > 0)
+    {
+        if (Escudo >= Danio)
+        {
+            Escudo -= Danio;
+            Danio = 0;
+        }
+        else
+        {
+            Danio -= Escudo;
+            Escudo = 0;
+        }
+    }
+
+    Vida -= Danio;
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Vida: %f | Escudo: %f"),
+        Vida,
+        Escudo
+    );
+
+    if (Vida <= 0)
+    {
+        Die();
+    }
+}
+
+float AEnemigo::GetVida() const
+{
+    return Vida;
+}
+
+void AEnemigo::SetVida(float NuevaVida)
+{
+    Vida = NuevaVida;
+}
+
+float AEnemigo::GetBlindaje() const
+{
+    return Blindaje;
+}
+
+void AEnemigo::SetBlindaje(float NuevoBlindaje)
+{
+    Blindaje = NuevoBlindaje;
+}
+
+float AEnemigo::GetEscudo() const
+{
+    return Escudo;
+}
+
+void AEnemigo::SetEscudo(float NuevoEscudo)
+{
+    Escudo = NuevoEscudo;
+}
+
+float AEnemigo::GetVelocidad() const
+{
+    return Velocidad;
+}
+
+void AEnemigo::SetVelocidad(float NuevaVelocidad)
+{
+    Velocidad = NuevaVelocidad;
 }

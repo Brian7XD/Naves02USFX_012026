@@ -3,6 +3,10 @@
 #include "Enemigo_Aereo.h"
 #include "Enemigo_Terrestre.h"
 #include "Enemigo_Acuatico.h"
+#include "EnemyFactory.h"
+#include "EnemyFactory_Aereo.h"
+#include "EnemyFactory_Terrestre.h"
+#include "EnemyFactory_Acuatico.h"
 #include "Kismet/GameplayStatics.h" // Necesario para buscar al jugador
 
 AControladorEnemigo::AControladorEnemigo()
@@ -15,11 +19,29 @@ void AControladorEnemigo::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 1. Iniciamos el juego creando las naves
+    // Crear factories
+    Factories.Add(
+        GetWorld()->SpawnActor<AEnemyFactory_Aereo>()
+    );
+
+    Factories.Add(
+        GetWorld()->SpawnActor<AEnemyFactory_Terrestre>()
+    );
+
+    Factories.Add(
+        GetWorld()->SpawnActor<AEnemyFactory_Acuatico>()
+    );
+
+    // Crear enemigos
     SpawnNaves();
 
-    // 2. Programamos: A los 5 segundos, que se formen
-    GetWorld()->GetTimerManager().SetTimer(TimerFase, this, &AControladorEnemigo::OrdenarFormacion, 5.0f, false);
+    GetWorld()->GetTimerManager().SetTimer(
+        TimerFase,
+        this,
+        &AControladorEnemigo::OrdenarFormacion,
+        5.0f,
+        false
+    );
 }
 
 void AControladorEnemigo::SpawnNaves()
@@ -32,12 +54,13 @@ void AControladorEnemigo::SpawnNaves()
         FVector SpawnOffset((i / 5) * 300.0f, (i % 5) * 300.0f, 100.0f);
         FVector FinalPos = PosBase + SpawnOffset;
 
-        AEnemigo* NuevaNave = nullptr;
+        AEnemyFactory* Factory = Factories[i % 3];
 
-        // Alternamos tipos para variedad
-        if (i % 3 == 0) NuevaNave = GetWorld()->SpawnActor<AEnemigo_Aereo>(AEnemigo_Aereo::StaticClass(), FinalPos, FRotator::ZeroRotator);
-        else if (i % 3 == 1) NuevaNave = GetWorld()->SpawnActor<AEnemigo_Terrestre>(AEnemigo_Terrestre::StaticClass(), FinalPos, FRotator::ZeroRotator);
-        else NuevaNave = GetWorld()->SpawnActor<AEnemigo_Acuatico>(AEnemigo_Acuatico::StaticClass(), FinalPos, FRotator::ZeroRotator);
+        AEnemigo* NuevaNave =
+            Factory->CrearEnemigo(
+                FinalPos,
+                FRotator::ZeroRotator
+            );
 
         if (NuevaNave)
         {
