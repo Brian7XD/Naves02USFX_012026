@@ -7,6 +7,9 @@
 #include "EnemyFactory_Aereo.h"
 #include "EnemyFactory_Terrestre.h"
 #include "EnemyFactory_Acuatico.h"
+#include "DecoradorEscudo.h"
+#include "DecoradorBlindaje.h"
+#include "DecoradorVelocidad.h"
 #include "Kismet/GameplayStatics.h" // Necesario para buscar al jugador
 
 AControladorEnemigo::AControladorEnemigo()
@@ -50,27 +53,52 @@ void AControladorEnemigo::SpawnNaves()
 
     for (int32 i = 0; i < 20; i++)
     {
-        // Distribución simple para que no choquen al nacer
         FVector SpawnOffset((i / 5) * 300.0f, (i % 5) * 300.0f, 100.0f);
         FVector FinalPos = PosBase + SpawnOffset;
 
         AEnemyFactory* Factory = Factories[i % 3];
 
-        AEnemigo* NuevaNave =
-            Factory->CrearEnemigo(
-                FinalPos,
-                FRotator::ZeroRotator
-            );
+        AEnemigo* NuevaNave = Factory->CrearEnemigo(FinalPos, FRotator::ZeroRotator);
 
         if (NuevaNave)
         {
             NuevaNave->SetControlador(this);
-            ContenedorNaves.Add(NuevaNave);
+
+            AEnemigo* Base = NuevaNave;
+
+            // 1. ESCUDO
+            ADecoradorEscudo* DecoradorEscudo =
+                GetWorld()->SpawnActor<ADecoradorEscudo>(ADecoradorEscudo::StaticClass(), FinalPos, FRotator::ZeroRotator);
+            if (DecoradorEscudo)
+            {
+                DecoradorEscudo->SetEnemigo(Base);
+                Base = DecoradorEscudo; // Ahora funciona porque DecoradorEscudo hereda de AEnemigo
+            }
+
+            // 2. BLINDAJE
+            ADecoradorBlindaje* DecoradorBlindaje =
+                GetWorld()->SpawnActor<ADecoradorBlindaje>(ADecoradorBlindaje::StaticClass(), FinalPos, FRotator::ZeroRotator);
+            if (DecoradorBlindaje)
+            {
+                DecoradorBlindaje->SetEnemigo(Base);
+                Base = DecoradorBlindaje;
+            }
+
+            // 3. VELOCIDAD
+            ADecoradorVelocidad* DecoradorVelocidad =
+                GetWorld()->SpawnActor<ADecoradorVelocidad>(ADecoradorVelocidad::StaticClass(), FinalPos, FRotator::ZeroRotator);
+            if (DecoradorVelocidad)
+            {
+                DecoradorVelocidad->SetEnemigo(Base);
+                Base = DecoradorVelocidad;
+            }
+
+            // Guardamos el contenedor final envuelto por los decoradores
+            ContenedorNaves.Add(Base);
         }
     }
     EnemigosVivos = ContenedorNaves.Num();
 }
-
 void AControladorEnemigo::OrdenarFormacion()
 {
     // Buscamos al Pawn del jugador

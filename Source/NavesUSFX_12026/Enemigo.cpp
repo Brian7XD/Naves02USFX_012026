@@ -1,9 +1,6 @@
 ﻿#include "Enemigo.h"
 #include "ControladorEnemigo.h"
 #include "TimerManager.h"
-#include "DecoradorEscudo.h"
-#include "DecoradorBlindaje.h"
-#include "DecoradorVelocidad.h"
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -71,29 +68,6 @@ void AEnemigo::BeginPlay()
         0
     ).GetSafeNormal();
 
-    ADecoradorEscudo* DecoradorEscudo =
-        GetWorld()->SpawnActor<ADecoradorEscudo>();
-
-    if (DecoradorEscudo)
-    {
-        DecoradorEscudo->SetEnemigo(this);
-    }
-
-    ADecoradorBlindaje* DecoradorBlindaje =
-        GetWorld()->SpawnActor<ADecoradorBlindaje>();
-
-    if (DecoradorBlindaje)
-    {
-        DecoradorBlindaje->SetEnemigo(this);
-    }
-
-    ADecoradorVelocidad* DecoradorVelocidad =
-        GetWorld()->SpawnActor<ADecoradorVelocidad>();
-
-    if (DecoradorVelocidad)
-    {
-        DecoradorVelocidad->SetEnemigo(this);
-    }
 }
 
 void AEnemigo::Tick(float DeltaTime)

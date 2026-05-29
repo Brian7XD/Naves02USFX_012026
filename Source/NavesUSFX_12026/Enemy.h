@@ -25,4 +25,10 @@ public:
 	virtual void Disparar() = 0;
 	virtual void ComportamientoParticular(float DeltaTime) = 0;
 	virtual void Die() = 0;
+
+	virtual void RecibirDanio(float Danio) = 0;
+	virtual float GetVida() const = 0;
+	virtual float GetEscudo() const = 0;
+	virtual float GetBlindaje() const = 0;
+	virtual float GetVelocidad() const = 0;
 };
