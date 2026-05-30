@@ -4,10 +4,4 @@
 #include "EnemyFactory.h"
 #include "Enemigo.h"
 
-AEnemigo* AEnemyFactory::CrearEnemigo(
-    FVector Posicion,
-    FRotator Rotacion
-)
-{
-    return nullptr;
-}
+

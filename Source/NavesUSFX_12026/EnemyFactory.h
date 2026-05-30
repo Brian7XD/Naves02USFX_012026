@@ -16,5 +16,6 @@ public:
     virtual AEnemigo* CrearEnemigo(
         FVector Posicion,
         FRotator Rotacion
-    );
+    )
+    PURE_VIRTUAL(AEnemyFactory::CrearEnemigo, return nullptr;);
 };
